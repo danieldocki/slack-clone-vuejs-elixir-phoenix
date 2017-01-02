@@ -1,0 +1,24 @@
+html, body {
+  height: 100%;
+}
+
+body {
+  font-family: 'Avenir', Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: #f9f9f9;
+  color: #555459;
+}
+
+#app {
+  display: flex;
+  align-items: stretch;
+  align-content: stretch;
+  height: auto;
+  min-height: 100%;
+}
+
+.card {
+  box-shadow: 0 1px 0 rgba(0,0,0,.25);
+  border: 1px solid #e8e8e8;
+}
