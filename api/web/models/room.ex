@@ -4,8 +4,8 @@ defmodule Sling.Room do
   schema "rooms" do
     field :name, :string
     field :topic, :string
-    many_to_many :users, Sling.User, join_through: "user_rooms"
-    has_many :messages, Sling.Message
+    many_to_many :users, Sling.User, join_through: "user_rooms", on_delete: :delete_all
+    has_many :messages, Sling.Message, on_delete: :delete_all
 
     timestamps()
   end
