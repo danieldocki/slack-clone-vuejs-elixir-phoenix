@@ -4,7 +4,9 @@ This Project was inspired by [Slack clone built with Phoenix and React](https://
 
 This Project is a Slack clone built with Phoenix and VueJS.
 
-![slack clone preview](https://raw.githubusercontent.com/danieldocki/slack-clone-vuejs-elixir-phoenix/branch/path/to/preview.png)
+![slack clone preview](https://raw.githubusercontent.com/danieldocki/slack-clone-vuejs-elixir-phoenix/master/preview.png)
+
+slack-clone-vuejs-elixir-phoenix/preview.png
 
 ## Getting started
 
