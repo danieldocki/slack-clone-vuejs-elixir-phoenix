@@ -3,7 +3,7 @@ import { Socket as PhoenixSocket } from 'phoenix'
 
 const socketUrl = process.env.APP_WEBSOCKET_URL
 
-const socket = new PhoenixSocket(socketUrl, {
+const socketInstance = new PhoenixSocket(socketUrl, {
   logger: (kind, msg, data) => {
     console.log(`${kind}: ${msg}`, data)
   },
@@ -12,11 +12,11 @@ const socket = new PhoenixSocket(socketUrl, {
 export const Socket = {
   connect(token, silent = false) {
     if (this.connClosed()) {
-      socket.params.token = token
-      socket.connect()
+      socketInstance.params.token = token
+      socketInstance.connect()
       console.log('Socket connected!')
     } else if (!this.connAvaiable()) {
-      socket.connect()
+      socketInstance.connect()
       console.log('Socket reconnected!')
     } else if (!silent) {
       console.warn('Try to connect a connected socket.')
@@ -25,19 +25,19 @@ export const Socket = {
 
   disconnect() {
     if (this.connClosed()) { return }
-    socket.disconnect(() => {
-      socket.reconnectTimer.reset()
+    socketInstance.disconnect(() => {
+      socketInstance.reconnectTimer.reset()
       console.log('Socket disconnected!')
     })
   },
 
   connAvaiable() {
-    return socket && (socket.connectionState() === 'open' ||
-                         socket.connectionState() === 'connecting')
+    return socketInstance && (socketInstance.connectionState() === 'open' ||
+                         socketInstance.connectionState() === 'connecting')
   },
 
   connClosed() {
-    return socket.connectionState() === 'closed'
+    return socketInstance.connectionState() === 'closed'
   },
 
   findChannel(id, prefix = 'rooms') {
@@ -48,10 +48,10 @@ export const Socket = {
       }
 
       const topicName = `${prefix}:${id}`
-      let channel = _.find(socket.channels, ch => ch.topic === topicName)
+      let channel = _.find(socketInstance.channels, ch => ch.topic === topicName)
 
       if (!channel) {
-        channel = socket.channel(topicName, {})
+        channel = socketInstance.channel(topicName, {})
       }
 
       if (channel.state === 'closed') {
@@ -78,7 +78,7 @@ export const Socket = {
       }
 
       const topicName = `${prefix}:${id}`
-      const channel = _.find(socket.channels, ch => ch.topic === topicName)
+      const channel = _.find(socketInstance.channels, ch => ch.topic === topicName)
 
       if (channel.state === 'closed') {
         reject()
@@ -102,7 +102,7 @@ export const Socket = {
 export default function install(Vue) {
   Object.defineProperty(Vue.prototype, '$socket', {
     get() {
-      return socket
+      return socketInstance
     },
   })
 }
