@@ -1,17 +1,14 @@
 import localforage from 'localforage'
-// plugins and src are alias. see client/build/webpack.base.conf.js
-// import { Presence } from 'phoenix'
+import { Presence } from 'phoenix'
 import { setToken as httpSetToken } from 'plugins/http'
-import * as phoenix from 'plugins/socket'
+import { Socket } from 'plugins/socket'
 import * as TYPES from './types'
 
 export const subscribeSetToken = (store) => {
   store.subscribe((mutation, { session }) => {
     if (TYPES.SET_TOKEN === mutation.type) {
-      // Set the Socket Authorization params with the token
-      phoenix.setToken(session.token)
       // Connect the socket
-      phoenix.socket.connect()
+      Socket.connect(session.token)
       // Set the Axios Authorization header with the token
       httpSetToken(session.token)
       // Sets the token to the local storage for auto-login purpose
@@ -23,6 +20,8 @@ export const subscribeSetToken = (store) => {
 export const subscribeLogout = (store) => {
   store.subscribe((mutation) => {
     if (TYPES.LOGOUT === mutation.type) {
+      // Disconnect the socket
+      Socket.disconnect()
       // Remove the token to the local storage
       localforage.removeItem('token')
     }
@@ -33,25 +32,27 @@ export const subscribeRoom = (store) => {
   store.subscribe((mutation, { room }) => {
     if (TYPES.SET_ROOM_ID === mutation.type) {
       const roomId = room.currentRoom.id
-      phoenix.setChannel(`rooms:${roomId}`)
+      let presences = {}
 
-      phoenix.getChannel().on('presence_state', (state) => {
-        phoenix.syncState(state)
-        store.commit(TYPES.ROOM_PRESENCE_UPDATE, phoenix.presenceList())
-      })
+      Socket.findChannel(roomId)
+        .then(({ channel, response }) => {
+          channel.on('presence_state', (state) => {
+            presences = Presence.syncState(presences, state)
+            store.dispatch('syncPresentUsers', presences)
+          })
 
-      phoenix.getChannel().on('presence_diff', (diff) => {
-        phoenix.syncDiff(diff)
-        store.commit(TYPES.ROOM_PRESENCE_UPDATE, phoenix.presenceList())
-      })
+          channel.on('presence_diff', (diff) => {
+            presences = Presence.syncDiff(presences, diff)
+            store.dispatch('syncPresentUsers', presences)
+          })
 
-      phoenix.getChannel().on('message_created', (message) => {
-        store.commit(TYPES.MESSAGE_CREATED, message)
-      })
+          channel.on('message_created', (message) => {
+            console.log('Message created!')
+            store.commit(TYPES.MESSAGE_CREATED, message)
+          })
 
-      phoenix.getChannel().join().receive('ok', (response) => {
-        store.commit(TYPES.ROOM_CONNECTED_TO_CHANNEL, response)
-      })
+          store.commit(TYPES.ROOM_CONNECTED_TO_CHANNEL, response)
+        })
     }
   })
 }

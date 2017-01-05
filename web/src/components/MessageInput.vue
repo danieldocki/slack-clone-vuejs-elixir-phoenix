@@ -15,6 +15,7 @@
 
 <script>
 import autosize from 'autosize'
+import { mapState } from 'vuex'
 import { isEmpty } from 'lodash'
 
 export default {
@@ -48,6 +49,12 @@ export default {
     $route: 'routeChanged',
   },
 
+  computed: {
+    ...mapState({
+      route: state => state.route,
+    }),
+  },
+
   methods: {
     routeChanged() {
       this.$el.focus()
@@ -70,8 +77,10 @@ export default {
 
     submit() {
       const { message } = this
-      this.createMessage({ message })
-      .then(() => {
+      this.createMessage({
+        roomId: this.route.params.id,
+        payload: { message },
+      }).then(() => {
         this.reset()
         this.handleInput()
       })
