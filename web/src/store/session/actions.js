@@ -1,4 +1,5 @@
 import localforage from 'localforage'
+import { Presence } from 'phoenix'
 import { isEmpty } from 'lodash'
 import { http } from 'plugins/http'
 import { getData } from 'utils/get'
@@ -38,7 +39,6 @@ export const authenticate = ({ dispatch }) =>
     return Promise.reject('FAIL_IN_LOAD_USER') // keep promise chain
   })
 
-
 export const logout = ({ dispatch }) =>
   http.delete('/sessions')
   .then(() => {
@@ -62,6 +62,13 @@ export const checkUserToken = ({ dispatch, state }) => {
     })
     // With the token in hand, retrieves the user's data, validating the token
     .then(() => dispatch('authenticate'))
+}
+
+export const syncPresentUsers = ({ commit }, presences) => {
+  const presentUsers = [];
+  Presence.list(presences, (id, { metas: [first] }) => first.user)
+          .map(user => presentUsers.push(user))
+  commit(TYPES.ROOM_PRESENCE_UPDATE, presentUsers)
 }
 
 export const setUser = ({ commit }, user) => {
