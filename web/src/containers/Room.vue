@@ -34,6 +34,7 @@ export default {
     ...mapState({
       room: state => state.room.currentRoom,
       messages: state => state.room.messages,
+      route: state => state.route,
       loadMoreMessages: state => state.room.pagination.total_pages >
         state.room.pagination.page_number,
       loadingOlderMessages: state => state.room.loadingOlderMessages,
@@ -49,14 +50,20 @@ export default {
   },
 
   beforeRouteLeave(to, from, next) {
-    this.leaveChannel().then(() => next())
+    this.leaveChannel(this.route.params.id).then(() => next())
   },
 
   methods: {
     routeChanged() {
-      this.leaveChannel().then(() =>
-        this.connectToChannel(this.$store.state.route.params.id)
-      )
+      if (this.route.name === 'room' && !!this.route.from.params.id) {
+        this.leaveChannel(this.route.from.params.id).then(() =>
+          this.connectToChannel(this.route.params.id)
+        )
+      } else if (this.route.name === 'room') {
+        this.connectToChannel(this.route.params.id)
+      } else {
+        this.leaveChannel(this.route.params.id)
+      }
     },
 
     handleLoadMore() {
@@ -66,7 +73,12 @@ export default {
       })
     },
 
-    ...mapActions(['connectToChannel', 'leaveChannel', 'loadOlderMessages', 'createMessage']),
+    ...mapActions([
+      'connectToChannel',
+      'leaveChannel',
+      'loadOlderMessages',
+      'createMessage',
+    ]),
   },
 
   components: {
