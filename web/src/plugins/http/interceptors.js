@@ -1,6 +1,6 @@
 // import { isArray } from 'lodash'
 
-export default (http, store) => {
+export default (http, store, router) => {
   // https://github.com/mzabriskie/axios#interceptors
   http.interceptors.response.use(
     response => response,
@@ -10,15 +10,15 @@ export default (http, store) => {
     * requests
     */
     (error) => {
-      // const { response } = error
+      const { response } = error
       /**
       * If token is either expired, not provided or invalid
       * then redirect to login. On server side the error
       * messages can be changed on app/Providers/EventServiceProvider.php
       */
-      // if ([401, 400].indexOf(response.status) > -1) {
-      //   router.push({ name: 'auth.singin' })
-      // }
+      if ([403, 401, 400].indexOf(response.status) > -1) {
+        router.push({ name: 'signin' })
+      }
       /**
       * Error messages are sent in arrays
       */
