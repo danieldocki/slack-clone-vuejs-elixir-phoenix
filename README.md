@@ -10,7 +10,21 @@ This Project is a Slack clone built with Phoenix and VueJS.
 
 To run the project locally:
 
+### quick start
+
+bring up the backend then the frontend:
+
+```sh
+make up_backend
+```
+
+```sh
+make up_frontend
+```
+
 #### Running the Phoenix app
+
+##### detailed
 
 Download dependencies
 
@@ -25,7 +39,7 @@ with your postgres user info if needed
 Create and migrate the database
 
 ```
-mix ecto.create ecto.migrate
+mix ecto.create && mix ecto.migrate
 ```
 
 Start the server
@@ -48,5 +62,5 @@ yarn
 Start the dev server
 
 ```
-npm run dev
+yarn run dev
 ```
